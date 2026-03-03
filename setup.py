@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mkpipe-loader-elasticsearch',
-    version='1.0.0',
+    version='0.1.0',
     license='Apache License 2.0',
     packages=find_packages(),
     install_requires=['mkpipe', 'elasticsearch>=8.0'],
