@@ -54,8 +54,26 @@ pipelines:
         batchsize: 5000
 ```
 
-- `full` replication: deletes the existing index before writing.
-- `incremental` replication: appends documents to the existing index.
+---
+
+## Write Strategy
+
+Control how data is written to Elasticsearch:
+
+```yaml
+      - name: public.events
+        target_name: stg_events
+        write_strategy: upsert       # append | replace | upsert
+        write_key: [event_id]        # required for upsert
+```
+
+| Strategy | Elasticsearch Behavior |
+|---|---|
+| `append` | Bulk insert documents (default for incremental) |
+| `replace` | Delete the index, then bulk insert (default for full) |
+| `upsert` | Bulk insert with document `_id` derived from `write_key` columns. Existing documents with the same `_id` are overwritten. |
+
+> **Note:** For `upsert`, the document `_id` is constructed by joining `write_key` column values with `_`. This leverages Elasticsearch's native idempotent indexing — re-indexing a document with the same `_id` replaces it.
 
 ---
 
@@ -84,8 +102,10 @@ Write throughput is controlled by `batchsize` — the number of documents sent p
 |---|---|---|---|
 | `name` | string | required | Source table name |
 | `target_name` | string | required | Elasticsearch destination index name |
-| `replication_method` | `full` / `incremental` | `full` | `full` deletes index first; `incremental` appends |
+| `replication_method` | `full` / `incremental` | `full` | Replication strategy |
 | `batchsize` | int | `10000` | Documents per `bulk` API call |
+| `write_strategy` | string | — | `append`, `replace`, `upsert` |
+| `write_key` | list | — | Key columns for upsert (used as document `_id`) |
 | `dedup_columns` | list | — | Columns used for `mkpipe_id` hash deduplication |
 | `tags` | list | `[]` | Tags for selective pipeline execution |
 | `pass_on_error` | bool | `false` | Skip table on error instead of failing |
