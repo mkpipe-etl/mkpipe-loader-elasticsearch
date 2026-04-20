@@ -42,7 +42,7 @@ class ElasticsearchLoader(BaseLoader, variant='elasticsearch'):
             logger.info({'table': target_name, 'status': 'skipped', 'reason': 'no data'})
             return
 
-        df = add_etl_columns(df, datetime.now(), dedup_columns=table.dedup_columns)
+        df = add_etl_columns(df, datetime.now(), dedup_columns=table.dedup_columns, ingested_at_column=self.ingested_at_column)
 
         strategy = resolve_write_strategy(table, data)
 
