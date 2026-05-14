@@ -70,7 +70,7 @@ Control how data is written to Elasticsearch:
 | Strategy | Elasticsearch Behavior |
 |---|---|
 | `append` | Bulk insert documents (default for incremental) |
-| `replace` | Delete the index, then bulk insert (default for full). Use `if_exists: append` to preserve existing index |
+| `replace` | Delete the index, then bulk insert (default for full). With `if_exists: append`: delete all documents + bulk insert (preserves index mappings) |
 | `upsert` | Bulk insert with document `_id` derived from `write_key` columns. Existing documents with the same `_id` are overwritten. |
 
 > **Note:** For `upsert`, the document `_id` is constructed by joining `write_key` column values with `_`. This leverages Elasticsearch's native idempotent indexing — re-indexing a document with the same `_id` replaces it.
@@ -106,7 +106,7 @@ Write throughput is controlled by `batchsize` — the number of documents sent p
 | `batchsize` | int | `10000` | Documents per `bulk` API call |
 | `write_strategy` | string | — | `append`, `replace`, `upsert` |
 | `write_key` | list | — | Key columns for upsert (used as document `_id`) |
-| `if_exists` | string | — | `replace` (delete+create index) or `append` (preserve index). Inherits from settings |
+| `if_exists` | string | — | `replace` (delete+create index) or `append` (preserve index, delete docs+insert). Inherits from settings |
 | `dedup_columns` | list | — | Columns used for `mkpipe_id` hash deduplication |
 | `tags` | list | `[]` | Tags for selective pipeline execution |
 | `pass_on_error` | bool | `false` | Skip table on error instead of failing |

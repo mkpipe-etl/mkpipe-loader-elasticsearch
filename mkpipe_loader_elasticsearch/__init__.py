@@ -65,9 +65,17 @@ class ElasticsearchLoader(BaseLoader, variant='elasticsearch'):
 
             match strategy:
                 case WriteStrategy.REPLACE:
-                    if self.if_exists != 'append' and es.indices.exists(index=target_name):
-                        es.indices.delete(index=target_name)
-                        logger.info({'table': target_name, 'status': 'index_deleted'})
+                    if es.indices.exists(index=target_name):
+                        if self.if_exists == 'append':
+                            es.delete_by_query(
+                                index=target_name,
+                                body={'query': {'match_all': {}}},
+                                refresh=True,
+                            )
+                            logger.info({'table': target_name, 'status': 'documents_deleted'})
+                        else:
+                            es.indices.delete(index=target_name)
+                            logger.info({'table': target_name, 'status': 'index_deleted'})
                 case WriteStrategy.APPEND | WriteStrategy.UPSERT:
                     pass
                 case _:
